@@ -16,7 +16,7 @@ class Genre(models.TextChoices):
 
 
 def _make_share_token() -> str:
-    # 22-char URL-safe token; unguessable, safe for public links.
+    
     return secrets.token_urlsafe(16)
 
 
