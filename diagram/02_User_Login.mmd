@@ -1,0 +1,28 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant LoginView as LoginView (Django)
+    participant Auth as authenticate()
+    participant DB as Database
+    participant Session as Session Store
+
+    User->>Browser: Open /accounts/login/
+    Browser->>LoginView: GET login page
+    LoginView-->>Browser: render login.html
+
+    User->>Browser: Enter credentials, submit
+    Browser->>LoginView: POST username + password
+    LoginView->>Auth: authenticate(username, password)
+    Auth->>DB: SELECT * FROM auth_user WHERE username=?
+    DB-->>Auth: user row + password hash
+    Auth->>Auth: check_password(raw, hash)
+    alt credentials invalid
+        Auth-->>LoginView: None
+        LoginView-->>Browser: re-render with error
+    else credentials valid
+        Auth-->>LoginView: User object
+        LoginView->>Session: create session
+        Session-->>Browser: Set-Cookie: sessionid
+        LoginView-->>Browser: redirect to /
+    end

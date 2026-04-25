@@ -1,0 +1,6 @@
+Django>=4.2,<5.1
+python-dotenv>=1.0.0
+requests>=2.31.0
+django-allauth>=0.61.0
+PyJWT[crypto]>=2.8.0
+Pillow>=10.0.0

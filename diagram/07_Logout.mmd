@@ -1,0 +1,13 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant LogoutView as LogoutView (Django)
+    participant Session as Session Store
+
+    User->>Browser: Click "Logout"
+    Browser->>LogoutView: POST /accounts/logout/
+    LogoutView->>Session: flush() session data
+    Session-->>Browser: clear sessionid cookie
+    LogoutView-->>Browser: redirect to /
+    Browser-->>User: show landing page (logged out)

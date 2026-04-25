@@ -1,0 +1,20 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant LibView as library_view
+    participant Auth as @login_required
+    participant DB as Database
+
+    User->>Browser: Click "My Library"
+    Browser->>LibView: GET /library/
+    LibView->>Auth: check session
+    alt not authenticated
+        Auth-->>Browser: redirect /accounts/login/
+    else authenticated
+        Auth-->>LibView: pass request.user
+        LibView->>DB: SELECT * FROM Song WHERE owner=user ORDER BY -created_at
+        DB-->>LibView: list of Song rows
+        LibView-->>Browser: render library.html with songs
+        Browser-->>User: display song cards (title, genre, audio player)
+    end

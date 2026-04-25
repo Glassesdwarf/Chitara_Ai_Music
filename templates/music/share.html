@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ song.title }} · shared on Chitara AI{% endblock %}
+{% block content %}
+<article class="detail card">
+  <header>
+    <h1>{{ song.title }}</h1>
+    <span class="tag">{{ song.get_genre_display }}</span>
+  </header>
+
+  <p class="prompt">{{ song.prompt }}</p>
+
+  {% if song.playable_url %}
+    <audio controls src="{{ song.playable_url }}" style="width:100%"></audio>
+  {% else %}
+    <p class="empty">No audio attached.</p>
+  {% endif %}
+
+  <div class="meta">
+    <small>Shared by <strong>{{ song.user.username|default:song.user.email }}</strong>
+      · generated on {{ song.created_at|date:"M j, Y" }}
+      via the <code>{{ song.strategy_used }}</code> strategy.</small>
+  </div>
+
+  <div class="actions">
+    <a class="btn primary" href="{% url 'share_download' song.share_token %}">Download</a>
+    <a class="btn ghost" href="{% url 'home' %}">Explore more on Chitara AI</a>
+  </div>
+</article>
+{% endblock %}

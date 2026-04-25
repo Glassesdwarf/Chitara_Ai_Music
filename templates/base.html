@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Chitara AI Music{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+  <header class="nav">
+    <a class="brand" href="{% url 'home' %}">🎵 Chitara<span>AI</span></a>
+    <nav>
+      <a href="{% url 'home' %}">Library</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'generate' %}">Generate</a>
+        <span class="user">{{ user.username|default:user.email }}</span>
+        <form method="post" action="{% url 'account_logout' %}" class="inline">
+          {% csrf_token %}
+          <button type="submit" class="link">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'account_login' %}">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  {% if messages %}
+    <ul class="messages">
+      {% for m in messages %}<li class="msg {{ m.tags }}">{{ m }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">Built with Django · Strategy pattern · Suno API</footer>
+</body>
+</html>

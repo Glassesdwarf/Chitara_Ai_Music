@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Generate · Chitara AI{% endblock %}
+{% block content %}
+<section class="form-wrap">
+  <h1>Generate a track</h1>
+  <p class="muted">Active strategy: <code>{{ strategy }}</code> (set via <code>MUSIC_STRATEGY</code> in <code>.env</code>)</p>
+  <form method="post" class="card form">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<small class="err">{{ field.errors|join:", " }}</small>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn primary">Generate</button>
+  </form>
+</section>
+{% endblock %}

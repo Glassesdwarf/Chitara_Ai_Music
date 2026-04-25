@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    actor User as Visitor
+    participant Browser
+    participant URLConf as Django URLs
+    participant View as accounts.views.register
+    participant Form as UserCreationForm
+    participant DB as Database
+    participant Auth as Django Auth
+
+    User->>Browser: Click "Sign Up"
+    Browser->>URLConf: GET /accounts/register/
+    URLConf->>View: route request
+    View->>Form: instantiate empty form
+    View-->>Browser: render register.html
+
+    User->>Browser: Submit (username, password)
+    Browser->>View: POST /accounts/register/
+    View->>Form: validate(POST data)
+    alt invalid
+        Form-->>View: errors
+        View-->>Browser: re-render form with errors
+    else valid
+        Form->>DB: INSERT INTO auth_user
+        DB-->>Form: new User row
+        View->>Auth: login(request, user)
+        Auth-->>Browser: set sessionid cookie
+        View-->>Browser: redirect to /
+    end

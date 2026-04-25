@@ -1,0 +1,44 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant JS as Polling Script
+    participant StatusView as song_status view
+    participant DB as Database
+    participant Strategy as SunoStrategy
+    participant Suno as Suno API
+    participant Notif as Notification API
+
+    Browser->>JS: page loaded, start poll loop
+    loop every 4 seconds
+        JS->>StatusView: GET /songs/<id>/status/
+        StatusView->>DB: SELECT Song WHERE id=? AND owner=user
+        DB-->>StatusView: song row
+
+        alt song.status in (READY, FAILED)
+            StatusView-->>JS: cached JSON {status, audio_url}
+        else still generating
+            StatusView->>Strategy: check_status(task_id)
+            Strategy->>Suno: GET /api/v1/generate/record-info?taskId=
+            Suno-->>Strategy: { status, sunoData[] }
+            Strategy-->>StatusView: {status, progress, audio_url}
+
+            alt status == SUCCESS
+                StatusView->>DB: UPDATE Song SET status=READY, audio_url=...
+            else status == failure code
+                StatusView->>DB: UPDATE Song SET status=FAILED, error
+            end
+            StatusView-->>JS: JSON {status, progress}
+        end
+
+        JS->>Browser: update progress bar + label
+
+        alt status == READY
+            JS->>Notif: new Notification("Track ready!")
+            Notif-->>User: desktop notification
+            JS->>Browser: reload page
+        else status == FAILED
+            JS->>Notif: new Notification("Generation failed")
+            JS->>Browser: show error message
+        end
+    end

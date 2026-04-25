@@ -1,0 +1,27 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant GenView as generate_view
+    participant Form as GenerateForm
+    participant Context as MusicGenerationContext
+    participant Strategy as SunoStrategy
+    participant Suno as Suno API
+    participant DB as Database
+
+    User->>Browser: Fill title, prompt, genre
+    Browser->>GenView: POST /generate/
+    GenView->>Form: validate(POST)
+    Form-->>GenView: cleaned_data
+    GenView->>Context: from_settings()
+    Context-->>GenView: context with strategy
+
+    GenView->>Strategy: submit_only(title, prompt, genre)
+    Strategy->>Suno: POST /api/v1/generate
+    Suno-->>Strategy: { taskId }
+    Strategy-->>GenView: task_id
+
+    GenView->>DB: INSERT Song(status=GENERATING, task_id)
+    DB-->>GenView: song.id
+    GenView-->>Browser: redirect /songs/<id>/
+    Browser->>Browser: load song_detail.html (progress UI)

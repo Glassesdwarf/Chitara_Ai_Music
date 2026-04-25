@@ -1,0 +1,25 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Browser
+    participant DetailView as song_detail view
+    participant DB as Database
+    participant CDN as Suno CDN
+
+    User->>Browser: Open /songs/<id>/
+    Browser->>DetailView: GET song detail
+    DetailView->>DB: SELECT Song WHERE id=? AND owner=user
+    DB-->>DetailView: song (status=READY, audio_url)
+    DetailView-->>Browser: render template with <audio src=audio_url>
+
+    User->>Browser: Press Play
+    Browser->>CDN: GET audio_url (range request)
+    CDN-->>Browser: audio stream
+    Browser-->>User: playback
+
+    opt Download
+        User->>Browser: Click Download
+        Browser->>CDN: GET audio_url
+        CDN-->>Browser: full mp3 file
+        Browser-->>User: save to disk
+    end

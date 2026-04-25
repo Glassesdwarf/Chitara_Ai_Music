@@ -1,0 +1,84 @@
+classDiagram
+    direction LR
+
+    class User {
+        +id: int
+        +username: str
+        +email: str
+        +password: str
+    }
+
+    class Song {
+        +id: int
+        +owner: User
+        +title: str
+        +prompt: str
+        +genre: str
+        +audio_url: str
+        +status: str
+        +task_id: str
+        +error_message: str
+        +strategy_used: str
+        +created_at: datetime
+    }
+
+    class GenerateForm {
+        +title: CharField
+        +prompt: TextField
+        +genre: ChoiceField
+        +is_valid() bool
+    }
+
+    class MusicGenerationContext {
+        +strategy: SongGenerationStrategy
+        +from_settings() MusicGenerationContext
+        +generate(title, prompt, genre) GeneratedSong
+    }
+
+    class SongGenerationStrategy {
+        <<interface>>
+        +name: str
+        +submit_only(title, prompt, genre) str
+        +check_status(task_id) dict
+        +generate(title, prompt, genre) GeneratedSong
+    }
+
+    class SunoStrategy {
+        -api_key: str
+        -api_base: str
+        -_headers() dict
+        -_submit(prompt, title, genre) str
+        -_poll(task_id) str
+        +submit_only(title, prompt, genre) str
+        +check_status(task_id) dict
+    }
+
+    class MockStrategy {
+        +submit_only(title, prompt, genre) str
+        +check_status(task_id) dict
+    }
+
+    class GeneratedSong {
+        +title: str
+        +prompt: str
+        +genre: str
+        +audio_url: str
+        +strategy_used: str
+    }
+
+    class Views {
+        +generate_view(request)
+        +song_detail(request, song_id)
+        +song_status(request, song_id)
+        +library(request)
+    }
+
+    User "1" --> "*" Song : owns
+    Views ..> GenerateForm : uses
+    Views ..> Song : reads/writes
+    Views ..> MusicGenerationContext : uses
+    MusicGenerationContext o--> SongGenerationStrategy : delegates to
+    SongGenerationStrategy <|.. SunoStrategy : implements
+    SongGenerationStrategy <|.. MockStrategy : implements
+    SunoStrategy ..> GeneratedSong : returns
+    MockStrategy ..> GeneratedSong : returns

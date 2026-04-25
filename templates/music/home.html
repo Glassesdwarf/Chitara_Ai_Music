@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Library · Chitara AI{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>Generate music from a single prompt.</h1>
+  <p>Type the vibe, pick a genre, hit generate. Built on a swappable strategy so we can flip between mock and Suno without changing app code.</p>
+  {% if user.is_authenticated %}
+    <a class="btn primary" href="{% url 'generate' %}">+ New track</a>
+  {% else %}
+    <a class="btn primary" href="{% url 'account_login' %}">Log in to generate</a>
+  {% endif %}
+</section>
+
+<section class="filter-bar">
+  <form method="get" class="genre-filter">
+    <label for="genre">Filter by genre:</label>
+    <select name="genre" id="genre" onchange="this.form.submit()">
+      <option value="">All genres</option>
+      {% for value, label in genres %}
+        <option value="{{ value }}" {% if value == selected_genre %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    {% if selected_genre %}<a class="btn ghost" href="{% url 'home' %}">Clear</a>{% endif %}
+  </form>
+</section>
+
+<section class="grid">
+  {% for song in songs %}
+    <article class="card">
+      <div class="card-head">
+        <h3><a href="{% url 'song_detail' song.pk %}">{{ song.title }}</a></h3>
+        <span class="tag">{{ song.get_genre_display }}</span>
+      </div>
+      <p class="prompt">{{ song.prompt|truncatechars:120 }}</p>
+      {% if song.playable_url %}
+        <audio controls preload="none" src="{{ song.playable_url }}"></audio>
+      {% endif %}
+      <div class="card-foot">
+        <small>by {{ song.user.username|default:song.user.email }} · {{ song.strategy_used }}</small>
+        <div style="display:flex;gap:.4rem">
+          <a class="btn small" href="{% url 'download' song.pk %}">Download</a>
+          {% if song.is_public %}
+            <a class="btn small ghost" href="{% url 'share' song.share_token %}">Share</a>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+  {% empty %}
+    <p class="empty">No songs yet. Be the first!</p>
+  {% endfor %}
+</section>
+{% endblock %}
